@@ -1,0 +1,20 @@
+I followed this guide to install the project 
+
+npx create-next-app the-kind-travel2
+**Configuration Options:**
+- ✅ TypeScript
+- ✅ ESLint
+- ✅ Tailwind CSS
+- ✅ App Router
+- ✅ Import alias (`@/*`)
+### Navigate to Project Directory
+cd the-kind-travel2
+## 2. Database Setup
+### Install Prisma
+npm install prisma @prisma/client
+### Initialize Prisma
+npx prisma init
+**Creates:**
+- `prisma/schema.prisma` - Database schema file
+- `.env` - Environment variables file
+## 3. Dependencies Installation
