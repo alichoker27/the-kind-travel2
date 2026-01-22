@@ -43,7 +43,17 @@ export async function sendEmail(
   };
 
   // Send email
-  await transporter.sendMail(mailOptions);
+  console.log(`[sendEmail] Attempting to send email to: ${to}`);
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log(
+      "[sendEmail] Email sent successfully. MessageId:",
+      info.messageId,
+    );
+  } catch (error) {
+    console.error("[sendEmail] Failed to send email:", error);
+    throw error;
+  }
 }
 
 /**
@@ -191,6 +201,167 @@ export function generatePasswordChangeEmailHTML(name: string): string {
 
                   <p style="font-size: 14px; color: #666666;">
                     For your security, we recommend changing your password regularly and keeping your account credentials private.
+                  </p>
+                </td>
+              </tr>
+
+              <!-- Footer -->
+              <tr>
+                <td style="background-color: #f8f9fa; padding: 20px; text-align: center;">
+                  <p style="font-size: 12px; color: #999999; margin: 0;">
+                    © 2025 The Kind Travel. All rights reserved.
+                  </p>
+                </td>
+              </tr>
+
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+}
+
+/**
+ * Generates HTML for profile update notification email
+ * @param name - Admin's name
+ * @param changes - List of changes made
+ * @returns HTML string
+ */
+export function generateProfileUpdateEmailHTML(
+  name: string,
+  changes: { field: string; old: string; new: string }[],
+): string {
+  const changesList = changes
+    .map(
+      (change) => `
+      <li style="margin-bottom: 10px;">
+        <strong>${change.field}:</strong> Changed from <span style="background-color: #ffebee; padding: 2px 5px; border-radius: 3px; text-decoration: line-through;">${change.old}</span> to <span style="background-color: #e8f5e9; padding: 2px 5px; border-radius: 3px;">${change.new}</span>
+      </li>
+    `,
+    )
+    .join("");
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px;">
+        <tr>
+          <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 10px; overflow: hidden;">
+              
+              <!-- Header -->
+              <tr>
+                <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; text-align: center;">
+                  <h1 style="color: #ffffff; margin: 0; font-size: 28px;">👤 Profile Updated</h1>
+                </td>
+              </tr>
+              
+              <!-- Content -->
+              <tr>
+                <td style="padding: 40px 30px;">
+                  <p style="font-size: 16px; color: #333333; line-height: 1.6;">
+                    Hello ${name || "Admin"},
+                  </p>
+                  
+                  <p style="font-size: 16px; color: #333333; line-height: 1.6;">
+                    Your admin profile details have been successfully updated. Here is a summary of the changes:
+                  </p>
+                  
+                  <div style="background-color: #f8f9fa; border-left: 4px solid #667eea; padding: 20px; margin: 20px 0;">
+                    <ul style="margin: 0; padding-left: 20px; color: #555555; font-size: 15px;">
+                      ${changesList}
+                    </ul>
+                  </div>
+
+                  <p style="font-size: 15px; color: #555555; line-height: 1.6;">
+                    If you did not make these changes, please contact support immediately.
+                  </p>
+                </td>
+              </tr>
+
+              <!-- Footer -->
+              <tr>
+                <td style="background-color: #f8f9fa; padding: 20px; text-align: center;">
+                  <p style="font-size: 12px; color: #999999; margin: 0;">
+                    © 2025 The Kind Travel. All rights reserved.
+                  </p>
+                </td>
+              </tr>
+
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+}
+
+/**
+ * Generates HTML for email change notification email
+ * @param name - Admin's name
+ * @param oldEmail - The previous email address
+ * @param newEmail - The new email address
+ * @returns HTML string
+ */
+export function generateEmailChangeEmailHTML(
+  name: string,
+  oldEmail: string,
+  newEmail: string,
+): string {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px;">
+        <tr>
+          <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 10px; overflow: hidden;">
+              
+              <!-- Header -->
+              <tr>
+                <td style="background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); padding: 40px; text-align: center;">
+                  <h1 style="color: #ffffff; margin: 0; font-size: 28px;">📧 Email Address Updated</h1>
+                </td>
+              </tr>
+              
+              <!-- Content -->
+              <tr>
+                <td style="padding: 40px 30px;">
+                  <p style="font-size: 16px; color: #333333; line-height: 1.6;">
+                    Hello ${name || "Admin"},
+                  </p>
+                  
+                  <p style="font-size: 16px; color: #333333; line-height: 1.6;">
+                    Your administrative email address for <strong>The Kind Travel</strong> has been successfully updated.
+                  </p>
+                  
+                  <div style="background-color: #f8f9fa; border-left: 4px solid #d4af37; padding: 20px; margin: 20px 0;">
+                    <p style="margin: 0 0 10px 0; color: #555555; font-size: 15px;">
+                      <strong>Old Email:</strong> <span style="text-decoration: line-through; opacity: 0.6;">${oldEmail}</span>
+                    </p>
+                    <p style="margin: 0; color: #555555; font-size: 15px;">
+                      <strong>New Email:</strong> <span style="color: #0c6b58; font-weight: bold;">${newEmail}</span>
+                    </p>
+                  </div>
+
+                  <p style="font-size: 15px; color: #555555; line-height: 1.6;">
+                    From now on, please use your <strong>new email</strong> to log in to the admin panel.
+                  </p>
+
+                  <p style="font-size: 14px; color: #666666; margin-top: 30px;">
+                    If you did not authorized this change, please contact our security team immediately.
                   </p>
                 </td>
               </tr>

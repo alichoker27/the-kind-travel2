@@ -5,7 +5,7 @@ import { verifyToken, JwtPayload } from "./jwt";
 /**
  * FOR MIDDLEWARE ONLY - Uses NextRequest
  */
-export function authenticateRequest(request: NextRequest) {
+export async function authenticateRequest(request: NextRequest) {
   const token = request.cookies.get("auth-token")?.value;
 
   if (!token) {
@@ -18,7 +18,7 @@ export function authenticateRequest(request: NextRequest) {
     };
   }
 
-  const decoded = verifyToken(token);
+  const decoded = await verifyToken(token);
 
   if (!decoded) {
     return {
@@ -45,7 +45,7 @@ export async function getAuthAdmin(): Promise<JwtPayload | null> {
 
   if (!token) return null;
 
-  return verifyToken(token);
+  return await verifyToken(token);
 }
 
 /**

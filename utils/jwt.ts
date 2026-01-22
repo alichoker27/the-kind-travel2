@@ -1,14 +1,15 @@
-import jwt, { Secret } from "jsonwebtoken";
+import { SignJWT, jwtVerify } from "jose";
 
 //Define the shape of the data that will be stored in the jwt payload
 export interface JwtPayload {
   adminId: number;
   adminEmail: string;
   adminName: string;
+  [key: string]: unknown; // Allow for other standard JWT claims
 }
 
 //Load and validate the JWT_SECRET from the .env file
-const JWT_SECRET: Secret = process.env.JWT_SECRET as string;
+const JWT_SECRET = process.env.JWT_SECRET as string;
 
 if (!JWT_SECRET) {
   throw new Error("JWT_SECRET is not defined in the environment variable");
@@ -21,14 +22,19 @@ if (process.env.NODE_ENV === "production" && JWT_SECRET.length < 32) {
   );
 }
 
+const secretKey = new TextEncoder().encode(JWT_SECRET);
+
 /**
  * Generates a JSON Web Token (JWT) for a given user payload.
  * @param payload The data to be stored in the token (e.g., admin ID, email , name).
- * @param expiresIn The duration after which the token expires (e.g., '1h', '7d').
  * @returns The generated JWT string.
  */
-export function generateToken(payload: JwtPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "1d" }); // 1 day
+export async function generateToken(payload: JwtPayload): Promise<string> {
+  return new SignJWT({ ...payload })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("1d")
+    .sign(secretKey);
 }
 
 /**
@@ -36,10 +42,10 @@ export function generateToken(payload: JwtPayload): string {
  * @param token The JWT string to verify.
  * @returns The decoded payload if the token is valid, otherwise null.
  */
-export function verifyToken(token: string): JwtPayload | null {
+export async function verifyToken(token: string): Promise<JwtPayload | null> {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
-    return decoded;
+    const { payload } = await jwtVerify(token, secretKey);
+    return payload as unknown as JwtPayload;
   } catch (e) {
     console.error("JWT verification failed :", e);
     return null;
@@ -53,6 +59,7 @@ export function verifyToken(token: string): JwtPayload | null {
 interface ResetTokenPayload {
   adminId: number;
   email: string;
+  [key: string]: unknown;
 }
 
 /**
@@ -61,8 +68,15 @@ interface ResetTokenPayload {
  * @param email - Admin's email address
  * @returns Reset token string
  */
-export function generateResetToken(adminId: number, email: string): string {
-  return jwt.sign({ adminId, email }, JWT_SECRET, { expiresIn: "1h" });
+export async function generateResetToken(
+  adminId: number,
+  email: string,
+): Promise<string> {
+  return new SignJWT({ adminId, email })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("1h")
+    .sign(secretKey);
 }
 
 /**
@@ -70,10 +84,12 @@ export function generateResetToken(adminId: number, email: string): string {
  * @param token - Reset token to verify
  * @returns Payload if valid, null if invalid/expired
  */
-export function verifyResetToken(token: string): ResetTokenPayload | null {
+export async function verifyResetToken(
+  token: string,
+): Promise<ResetTokenPayload | null> {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as ResetTokenPayload;
-    return decoded;
+    const { payload } = await jwtVerify(token, secretKey);
+    return payload as unknown as ResetTokenPayload;
   } catch (e) {
     console.error("Reset token verification failed:", e);
     return null;
