@@ -4,6 +4,9 @@
 // ============================================ */
 /* Logo Container */
 .logoContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin-bottom: 30px;
   animation: bounce 2s infinite;
 }
