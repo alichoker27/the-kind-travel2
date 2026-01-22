@@ -18,3 +18,9 @@ npx prisma init
 - `prisma/schema.prisma` - Database schema file
 - `.env` - Environment variables file
 ## 3. Dependencies Installation
+
+
+
+
+in the package.json file I replaced the build script with this: 
+"build": "prisma generate && next build"
